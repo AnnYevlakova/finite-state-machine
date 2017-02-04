@@ -4,7 +4,7 @@ class FSM {
         throw new Error("arguments are necessary");
      }
         this.config = config;
-		this.initial = 'normal';
+		this.initial = this.config.initial;
         this.prevState = null;
 		this.stackRedo = [];
 		this.stackUndo = [];
@@ -18,7 +18,7 @@ class FSM {
 		if(state == undefined) {
             throw new Error("arguments are necessary");
         }
-        if(state == 'normal' || state == 'busy' || state == 'hungry' || state == 'sleeping'){
+        if(state in this.config.states){
             this.prevState = this.initial;
             this.initial = state;
 			this.stackUndo.push(this.prevState);
@@ -32,7 +32,7 @@ class FSM {
         if (event == undefined) {
             throw new Error("arguments are necessary");
         }
-		if(this.config.states[this.initial].transitions[event] != null) {
+		if(event in this.config.states[this.initial].transitions) {
             this.prevState = this.initial;
             this.initial = this.config.states[this.initial].transitions[event];
 			this.stackUndo.push(this.prevState);
@@ -51,19 +51,20 @@ class FSM {
     }
 
     getStates(event) {
-		if (event == undefined) {
-            return ['normal', 'busy', 'hungry', 'sleeping'];
-        }
 		var states = [];
-        for(var key in this.config.states) {
+		if (event == undefined) {
+			for(var key in this.config.states) {
+            	states.push(key);
+            }
+			return states;
+		}
+		for(var key in this.config.states) {
             if( event in this.config.states[key].transitions) {
                 states.push(key);
             }
 		}
-		 
 		return states;
-		
-    }
+	}
 
     undo() {
         if(this.stackUndo.length != 0) {
